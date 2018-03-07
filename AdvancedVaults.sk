@@ -73,6 +73,7 @@ function configHeader(i: Integer = 1):
 
 function configGenerate(i: Integer = 1):
 	set yaml value "settings.vault-price" of file "plugins/AdvancedVaults/config.yml" to 10000
+	set yaml value "settings.vault-price-increase-per-vault" of file "plugins/AdvancedVaults/config.yml" to 0
 
 function defaultGenerate(i: Integer = 1):
 	if directory "plugins/AdvancedVaults" doesn't exist:
@@ -226,6 +227,12 @@ function rowsVault(page: Number, size: Number, num: Number) :: Number:
 		set {_num} to rounded up ({_num} - ({_page}-1)*36)/9
 		return {_num}
 
+function vaultPrice(Number n) :: Number:
+	set {_p} to yaml value "settings.vault-price-increase-per-vault" from file "plugins/AdvancedVaults/config.yml"
+	set {_price-increase} to {_n} * {_p}
+	return {_price-increase}
+
+
 
 function advVaultMenu(p: Player, page: Number):
 	set {_u} to uuid of {_p}
@@ -256,7 +263,9 @@ function advVaultMenu(p: Player, page: Number):
 						else if gui-click-type is right mouse button:
 							vaultEdit({_p}, {_n})
 				else:
-					set {_price} to yaml value "settings.vault-price" from file "plugins/AdvancedVaults/config.yml"
+					set {_p} to yaml value "settings.vault-price" from file "plugins/AdvancedVaults/config.yml"
+					set {_price} = vaultPrice({_n}) + {_p.
+					}
 					make gui slot (loop-number + 8) with barrier named "&c&lLocked Vault" with lore "&7&m-------------||||&8&lPurchase Vault for &a&l$%{_price}%||||&7&m-------------":
 						if {_p}'s balance >= {_price}:
 							remove {_price} from {_p}'s balance
