@@ -1,0 +1,2 @@
+# AdvancedVaultsSkript
+Skript for Minecraft
