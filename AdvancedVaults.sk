@@ -1,0 +1,330 @@
+options:
+	prefix: &c&lAdv&4Vaults&8»
+	headerfooter: &7&m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	version: 1.2
+
+on load:
+	delete {itemlist::*}
+	add diamond to {itemlist::*}
+	add emerald to {itemlist::*}
+	add ender chest to {itemlist::*}
+	add bookshelf to {itemlist::*}
+	add netherrack to {itemlist::*}
+	add blaze rod to {itemlist::*}
+	add crafting table to {itemlist::*}
+	add obsidian to {itemlist::*}
+	add furnace to {itemlist::*}
+	add enchantment table to {itemlist::*}
+	add jukebox to {itemlist::*}
+	add redstone to {itemlist::*}
+	add iron ingot to {itemlist::*}
+	add gold ingot to {itemlist::*}
+	add sea lantern to {itemlist::*}
+	add diamond sword to {itemlist::*}
+	add diamond chestplate to {itemlist::*}
+	add water bucket to {itemlist::*}
+	add lava bucket to {itemlist::*}
+	add book to {itemlist::*}
+	add compass to {itemlist::*}
+	add clock to {itemlist::*}
+	add steak to {itemlist::*}
+	add ender pearl to {itemlist::*}
+	add chest to {itemlist::*}
+	add brewing stand item to {itemlist::*}
+	add nether star to {itemlist::*}
+
+function space(p: Player, n: Number, text: String):
+	message "{@headerfooter}" to {_p}
+	loop {_n} times:
+		message "" to {_p}
+	message "%{_text}%" to {_p}
+	loop {_n} times:
+		message "" to {_p}
+	message "{@headerfooter}" to {_p}
+
+on chat:
+	if {advvaults.chat.%uuid of player%} is set:
+		space(player, 1, "        &7Vault name has been &cchanged &7to %colored message%")
+		set {advvaults.name.%uuid of player%::%{advvaults.chat.%uuid of player%}%} to "%colored message%"
+		delete {advvaults.chat.%uuid of player%}
+		cancel event
+
+function permissionsHeader(i: Integer = 1):
+	write "## Custom Permissions can be created with their own minimum and maximum vaults" at line 1 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## Players with each permissions with have the miniumum vaults available to them. And up to the maximum available for purchase." at line 2 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## Price of the purchasable vaults can be edited in the config.yml" at line 3 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## Players with permission 'advancedvaults.open' will gain the default min and max." at line 4 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## " at line 5 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## Use Example format below" at line 6 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## " at line 7 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## permissions:" at line 8 to file "plugins/AdvancedVaults/permissions.yml"
+	write "##   example-name:" at line 9 to file "plugins/AdvancedVaults/permissions.yml"
+	write "##     min: 5" at line 10 to file "plugins/AdvancedVaults/permissions.yml"
+	write "##     max: 10" at line 11 to file "plugins/AdvancedVaults/permissions.yml"
+	write "##     rows: 4" at line 12 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## " at line 13 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## Permission: 'advancedvaults.open.example-name'" at line 14 to file "plugins/AdvancedVaults/permissions.yml"
+	write "## " at line 15 to file "plugins/AdvancedVaults/permissions.yml"
+
+function configHeader(i: Integer = 1):
+	write "## Thank you for using AdvancedVaults | Don't forget to leave a review!" at line 1 to file "plugins/AdvancedVaults/config.yml"
+	write "## All below options are customizable" at line 2 to file "plugins/AdvancedVaults/config.yml"
+	write "## " at line 3 to file "plugins/AdvancedVaults/config.yml"
+
+function configGenerate(i: Integer = 1):
+	set yaml value "settings.vault-price" of file "plugins/AdvancedVaults/config.yml" to 10000
+
+function defaultGenerate(i: Integer = 1):
+	if directory "plugins/AdvancedVaults" doesn't exist:
+		create directory "plugins/AdvancedVaults"
+	if file "plugins/AdvancedVaults/permissions.yml" doesn't exist: 
+		create file "plugins/AdvancedVaults/permissions.yml"
+		permissionsHeader()
+	set yaml value "permissions.default.min" of file "plugins/AdvancedVaults/permissions.yml" to 1
+	set yaml value "permissions.default.max" of file "plugins/AdvancedVaults/permissions.yml" to 9
+	set yaml value "permissions.default.rows" of file "plugins/AdvancedVaults/permissions.yml" to 6
+
+
+function vaultMin(p: Player) :: Number:
+	set {_sep} to "%system property file separator%"
+	if dir "plugins%{_sep}%AdvancedVaults" exists:
+		set {_file} to "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		set {_default} to yaml value "permissions.default.min" from file "%{_file}%"
+		if {_default} is not set:
+			defaultGenerate()
+		set {_min} to yaml value "permissions.default.min" from file "%{_file}%"
+		loop yaml nodes "permissions" from file "%{_file}%":
+			if loop-value is not "default":
+				if {_p} has permission "advancedvaults.open.%loop-value%":
+					set {_temp} to yaml value "permissions.%loop-value%.min" from file "%{_file}%"
+					if {_temp} > {_min}:
+						set {_min} to {_temp}
+		return {_min}
+	else:
+		defaultGenerate()
+		set {_min} to yaml value "permissions.default.min" from file "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		return {_min}
+
+
+function vaultMax(p: Player) :: Number:
+	set {_sep} to "%system property file separator%"
+	if dir "plugins%{_sep}%AdvancedVaults" exists:
+		set {_file} to "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		set {_default} to yaml value "permissions.default.max" from file "%{_file}%"
+		if {_default} is not set:
+			defaultGenerate()
+		set {_max} to yaml value "permissions.default.max" from file "%{_file}%"
+		loop yaml nodes "permissions" from file "%{_file}%":
+			if loop-value is not "default":
+				if {_p} has permission "advancedvaults.open.%loop-value%":
+					set {_temp} to yaml value "permissions.%loop-value%.max" from file "%{_file}%"
+					if {_temp} > {_max}:
+						set {_max} to {_temp}
+		return {_max}
+	else:
+		defaultGenerate()
+		set {_max} to yaml value "permissions.default.max" from file "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		return {_max}
+
+function vaultRows(p: Player) :: Number:
+	set {_sep} to "%system property file separator%"
+	if dir "plugins%{_sep}%AdvancedVaults" exists:
+		set {_file} to "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		set {_default} to yaml value "permissions.default.rows" from file "%{_file}%"
+		if {_default} is not set:
+			defaultGenerate()
+		set {_max} to yaml value "permissions.default.rows" from file "%{_file}%"
+		loop yaml nodes "permissions" from file "%{_file}%":
+			if loop-value is not "default":
+				if {_p} has permission "advancedvaults.open.%loop-value%":
+					set {_temp} to yaml value "permissions.%loop-value%.rows" from file "%{_file}%"
+					if {_temp} > {_max}:
+						set {_max} to {_temp}
+		return {_max}
+	else:
+		defaultGenerate()
+		set {_max} to yaml value "permissions.default.rows" from file "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		return {_max}
+
+function vaultLimits(p: Player):
+	if {_p} has permission "advancedvaults.open":
+		set {_uuid} to uuid of {_p}
+		set {advvaults.max::%{_uuid}%} to vaultMax({_p})
+		set {advvaults.min::%{_uuid}%} to vaultMin({_p})
+		set {advvaults.rows::%{_uuid}%} to vaultRows({_p})
+		if {advvaults.min::%{_uuid}%} > {advvaults.max::%{_uuid}%}:
+			set {advvaults.min::%{_uuid}%} to {advvaults.max::%{_uuid}%}
+		if {advvaults.owned::%{_uuid}%} is not set:
+			set {advvaults.owned::%{_uuid}%} to {advvaults.min::%{_uuid}%}
+		if {advvaults.rows::%{_uuid}%} > 6:
+			set {advvaults.rows::%{_uuid}%} to 6
+		if {advvaults.rows::%{_uuid}%} < 1:
+			set {advvaults.rows::%{_uuid}%} to 1
+
+function vaultOpen(p: OfflinePlayer, n: Number, a: Player):
+	set {_u} to uuid of {_p}
+	if {advvaults.name.%{_u}%::%{_n}%} is not set:
+		set {_GUIname} to "&c&lVault %{_n}%"
+	else:
+		set {_GUIname} to "%{advvaults.name.%{_u}%::%{_n}%}%"
+	
+	if {advvaults.rows::%{_u}%} is not set:
+		set {_sep} to "%system property file separator%"
+		set {_file} to "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
+		set {_rows} to yaml value "permissions.default.rows" from file "%{_file}%"
+	else:
+		set {_rows} to {advvaults.rows::%{_u}%}
+	create a gui with virtual chest with size {_rows} named "%{_GUIname}%":
+		run when close:
+			set {advvaults.items.%{_u}%.%{_n}%::*} to all items of gui-inventory
+			if {_a} is not {_p}:
+				space({_a}, 1, "        &cChanges to &4%{_p}%'s Vault &chave been saved")
+		open last created gui to {_a}
+		set {_x} to 0
+		loop {advvaults.items.%{_u}%.%{_n}%::*}:
+			broadcast "%loop-value%"
+			set slot {_x} of {_a}'s current inventory to loop-value
+			add 1 to {_x}
+
+function vaultEdit(p: Player, n: Number):
+	set {_u} to uuid of {_p}
+	if {advvaults.name.%{_u}%::%{_n}%} is not set:
+		set {_GUIname} to "&c&lEdit Vault %{_n}%"
+	else:
+		set {_GUIname} to "&c&lEdit %{advvaults.name.%{_u}%::%{_n}%}%"
+	create a gui with virtual chest with size 6 named "%{_GUIname}%":
+		make gui slot (integers from 0 to 8) with black stained glass pane named "&0"
+		loop {itemlist::*}:
+			set {_item} to loop-value
+			make gui slot (loop-index parsed as number) + 8 with loop-value named "&7Change Icon to &c&l%loop-value%" with lore "||&8Click &7to select":
+				set {advvaults.icon.%{_u}%::%{_n}%} to {_item}
+#				space({_p}, 1, "        &7The item for &c&lVault %{_n}% &7has been set to &c&l%{_item}%")
+				set {_page} to rounded up {_n}/36
+				advVaultMenu({_p}, {_page})
+		make gui slot (integers from 45 to 53) with black stained glass pane named "&0"
+		make gui slot 52 with barrier named "&c&lClear Vault":
+			delete {advvaults.items.%{_u}%.%{_n}%::*}
+			space({_p}, 1, "        &7You have &ccleared Vault %{_n}%")
+			close {_p}'s inventory
+		make gui slot 46 with book and quill named "&c&lRename Vault" with lore "&7&m-------------||||&8Left-Click &7to rename Vault||&4Right-Click &cto reset name||||&7&m-------------":
+			if gui-click-type is left mouse button:
+				space({_p}, 1, "        &c&lPlease type a new name in chat. &7Colors can be used.")
+				set {advvaults.chat.%{_u}%} to {_n}
+				close {_p}'s inventory
+			if gui-click-type is right mouse button:
+				delete {advvaults.name.%{_u}%::%{_n}%}
+				close {_p}'s inventory
+				set {_page} to rounded up {_n}/36
+				advVaultMenu({_p}, {_page})
+		open last created gui to {_p} 
+
+
+function rowsVault(page: Number, size: Number, num: Number) :: Number:
+	if {_num} > ({_page}*36):
+		return 4
+	else:
+		set {_num} to rounded up ({_num} - ({_page}-1)*36)/9
+		return {_num}
+
+
+function advVaultMenu(p: Player, page: Number):
+	set {_u} to uuid of {_p}
+	if {advvaults.max::%{_u}%} is set:
+		set {_mxPg} to rounded up ({advvaults.max::%{_u}%}/36)
+		if {_mxPg} is less than 1:
+			set {_mxPg} to 1
+		set {_max} to {advvaults.max::%{_u}%}
+		set {_min} to {advvaults.min::%{_u}%}
+		set {_owned} to {advvaults.owned::%{_u}%}
+		set {_rows} to rowsVault({_page}, 36, {advvaults.max::%{_u}%}) + 2
+		create a gui with virtual chest with size {_rows} named "&c&lAdv&4Vaults&8■ &7%{_page}%&8/&7%{_mxPg}%":
+			make gui slot (integers from 0 to 8) with black stained glass pane named "&0"
+			loop ({_max} - ({_page}-1)*36) times:
+				set {_n} to loop-number + ({_page}-1)*36
+				if {advvaults.icon.%{_u}%::%{_n}%} is set:
+					set {_item} to {advvaults.icon.%{_u}%::%{_n}%}
+				else:
+					set {_item} to chest
+				if {_n} <= {_owned}:
+					if {advvaults.name.%{_u}%::%{_n}%} is not set:
+						set {_name} to "&c&lVault: &8&l%{_n}%"
+					else:
+						set {_name} to "&c&lVault: &8&l%{advvaults.name.%{_u}%::%{_n}%}%"
+					make gui slot (loop-number + 8) with {_item} named "%{_name}%" with lore "&7&m-------------||||&c&l➥&4&lContains: &7%size of {advvaults.items.%{_u}%.%{_n}%::*}%||||&8Left-Click &7to open vault||&4Right-Click &cto edit vault name/item||||&7&m-------------":
+						if gui-click-type is left mouse button:
+							vaultOpen({_p}, {_n}, {_p})
+						else if gui-click-type is right mouse button:
+							vaultEdit({_p}, {_n})
+				else:
+					set {_price} to yaml value "settings.vault-price" from file "plugins/AdvancedVaults/config.yml"
+					make gui slot (loop-number + 8) with barrier named "&c&lLocked Vault" with lore "&7&m-------------||||&8&lPurchase Vault for &a&l$%{_price}%||||&7&m-------------":
+						if {_p}'s balance >= {_price}:
+							remove {_price} from {_p}'s balance
+							add 1 to {advvaults.owned::%{_u}%}
+							advVaultMenu({_p}, 1)
+						else:
+							close {_p}'s inventory
+							space({_p}, 1, "        &c&lInsufficient Funds to purchase this Vault")
+
+			if {_rows} is between 3 and 6:
+				make gui slot (integers from (9 * {_rows}) - 9 to (9 * {_rows}) - 1) with black stained glass pane named "&0"
+			if {_page} > 1:
+				make gui slot (9 * {_rows}) - 9 with skull of "MHF_ArrowLeft" parsed as offline player named "&c« &4Previous Page":
+					advVaultMenu({_p} and ({_page} - 1))
+			if ({advvaults.max::%{_u}%} - {_page}*36) > 0: #Check if there is values for next pages
+				make gui slot 53 with skull of "MHF_ArrowRight" parsed as offline player named "&2Next Page &a»":
+					advVaultMenu({_p} and ({_page} + 1))
+			open last created gui to {_p}
+	else:
+		send "{@prefix} &7You have no access to &cany vaults." to {_p}
+
+on load:
+	if directory "plugins/AdvancedVaults" doesn't exist:
+		create directory "plugins/AdvancedVaults"
+	if file "plugins/AdvancedVaults/permissions.yml" doesn't exist: 
+		create file "plugins/AdvancedVaults/permissions.yml"
+		permissionsHeader()
+		defaultGenerate()
+	if file "plugins/AdvancedVaults/config.yml" doesn't exist:
+		create file "plugins/AdvancedVaults/config.yml"
+		configHeader()
+		configGenerate()
+
+#Vault Command
+#[<text>] [<integer>] [<text>]:
+
+command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]: 
+	aliases: /chest, /playervault, /vaults, /pv, /advancedvaults, /advancedvault, /backpack
+	description: A place to store your items.
+	permission: advancedvaults.open
+	permission message: {@prefix} &cYou do not have permission to use this command.
+	trigger:
+		if arg 1 is not set:
+			vaultLimits(player)
+			wait 2 ticks
+			advVaultMenu(player, 1)
+
+		else if arg 1 is "open":
+			if arg 2 is set:
+				if arg 3 is player:
+					vaultLimits(player)
+					if arg 2 <= {advvaults.max::%uuid of player%}:
+						if arg 2 <= {advvaults.owned::%uuid of player%}:
+							vaultOpen(player, arg 2, player)
+						else:
+							message "{@prefix} &7You &cdo not &7own &cVault %arg 2%"
+					else:
+						message "{@prefix} &7You &cdo not &7have access to &cVault %arg 2%"
+				else if player has permission "advancedvaults.admin.open":
+					if {advvaults.min::%uuid of arg 3%} is set:
+						if arg 2 <= {advvaults.max::%uuid of player%}:
+							if arg 2 <= {advvaults.owned::%uuid of player%}:
+								vaultOpen(arg 3, arg 2, player)
+							else:
+								message "{@prefix} &7%arg 3% &cdoes not &7own &cVault %arg 2%"
+						else:
+							message "{@prefix} &cVault %arg 2% &7does not exist for &c%arg 3%"
+					else:
+						message "{@prefix} &c%arg 3% &7has no vaults."
+
+#		else if arg 1 is "clear":
