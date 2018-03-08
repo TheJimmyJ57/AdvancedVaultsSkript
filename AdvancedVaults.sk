@@ -302,7 +302,7 @@ on load:
 #Vault Command
 #[<text>] [<integer>] [<text>]:
 
-command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]: 
+command /vault [<text>] [<number>] [<offlineplayer=%player%>]: 
 	aliases: /chest, /playervault, /vaults, /pv, /advancedvaults, /advancedvault, /backpack
 	description: A place to store your items.
 	permission: advancedvaults.open
@@ -335,5 +335,32 @@ command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]:
 							message "{@prefix} &cVault %arg 2% &7does not exist for &c%arg 3%"
 					else:
 						message "{@prefix} &c%arg 3% &7has no vaults."
+				else:
+					message "{@prefix} &cYou do not have permission to use this command."
 
-#		else if arg 1 is "clear":
+		else if arg 1 is "clear":
+			if arg 2 is set:
+				if arg 3 is player:
+					if arg 2 <= {advvaults.max::%uuid of player%}:
+						if arg 2 <= {advvaults.owned::%uuid of player%}:
+							delete {advvaults.items.%uuid of player%.%arg 2%::*}
+							space({_p}, 1, "        &7You have &ccleared Vault %arg 2%")
+						else:
+							message "{@prefix} &7You &cdo not &7own &cVault %arg 2%"
+					else:
+						message "{@prefix} &7You &cdo not &7have access to &cVault %arg 2%"
+				else if player has permission "advancedvaults.admin.edit":
+					if {advvaults.min::%uuid of arg 3%} is set:
+						if arg 2 <= {advvaults.max::%uuid of arg 3%}:
+							if arg 2 <= {advvaults.owned::%uuid of arg 3%}:
+								delete {advvaults.items.%uuid of player%.%arg 2%::*}
+								space({_p}, 1, "        &7You have &ccleared Vault %arg 2% &7for &c%arg 3%")
+							else:
+								message "{@prefix} &7%arg 3% &cdoes not &7own &cVault %arg 2%"
+						else:
+							message "{@prefix} &7%arg 3% &cdoes not &7have access to &cVault %arg 2%"
+					else:
+						message "{@prefix} &c%arg 3% &7has no vaults."	
+				else:
+					message "{@prefix} &cYou do not have permission to use this command."
+
