@@ -183,7 +183,6 @@ function vaultOpen(p: OfflinePlayer, n: Number, a: Player):
 		open last created gui to {_a}
 		set {_x} to 0
 		loop {advvaults.items.%{_u}%.%{_n}%::*}:
-			broadcast "%loop-value%"
 			set slot {_x} of {_a}'s current inventory to loop-value
 			add 1 to {_x}
 
@@ -227,7 +226,7 @@ function rowsVault(page: Number, size: Number, num: Number) :: Number:
 		set {_num} to rounded up ({_num} - ({_page}-1)*36)/9
 		return {_num}
 
-function vaultPrice(Number n) :: Number:
+function vaultPrice(n: Number) :: Number:
 	set {_p} to yaml value "settings.vault-price-increase-per-vault" from file "plugins/AdvancedVaults/config.yml"
 	set {_price-increase} to {_n} * {_p}
 	return {_price-increase}
@@ -263,9 +262,8 @@ function advVaultMenu(p: Player, page: Number):
 						else if gui-click-type is right mouse button:
 							vaultEdit({_p}, {_n})
 				else:
-					set {_p} to yaml value "settings.vault-price" from file "plugins/AdvancedVaults/config.yml"
-					set {_price} = vaultPrice({_n}) + {_p.
-					}
+					set {_configPrice} to yaml value "settings.vault-price" from file "plugins/AdvancedVaults/config.yml"
+					set {_price} to vaultPrice({_n}) + {_configPrice}
 					make gui slot (loop-number + 8) with barrier named "&c&lLocked Vault" with lore "&7&m-------------||||&8&lPurchase Vault for &a&l$%{_price}%||||&7&m-------------":
 						if {_p}'s balance >= {_price}:
 							remove {_price} from {_p}'s balance
@@ -302,7 +300,7 @@ on load:
 #Vault Command
 #[<text>] [<integer>] [<text>]:
 
-command /vault [<text>] [<number>] [<offlineplayer=%player%>]: 
+command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]: 
 	aliases: /chest, /playervault, /vaults, /pv, /advancedvaults, /advancedvault, /backpack
 	description: A place to store your items.
 	permission: advancedvaults.open
@@ -344,7 +342,7 @@ command /vault [<text>] [<number>] [<offlineplayer=%player%>]:
 					if arg 2 <= {advvaults.max::%uuid of player%}:
 						if arg 2 <= {advvaults.owned::%uuid of player%}:
 							delete {advvaults.items.%uuid of player%.%arg 2%::*}
-							space({_p}, 1, "        &7You have &ccleared Vault %arg 2%")
+							space(player, 1, "        &7You have &ccleared Vault %arg 2%")
 						else:
 							message "{@prefix} &7You &cdo not &7own &cVault %arg 2%"
 					else:
@@ -354,7 +352,9 @@ command /vault [<text>] [<number>] [<offlineplayer=%player%>]:
 						if arg 2 <= {advvaults.max::%uuid of arg 3%}:
 							if arg 2 <= {advvaults.owned::%uuid of arg 3%}:
 								delete {advvaults.items.%uuid of player%.%arg 2%::*}
-								space({_p}, 1, "        &7You have &ccleared Vault %arg 2% &7for &c%arg 3%")
+								space(player, 1, "        &7You have &ccleared Vault %arg 2% &7for &c%arg 3%")
+								if arg 3 is online:
+									space(arg 3, 1, "		&7Your &cVault %arg 2% &7has been cleared by &c%player%")
 							else:
 								message "{@prefix} &7%arg 3% &cdoes not &7own &cVault %arg 2%"
 						else:
