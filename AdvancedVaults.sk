@@ -228,10 +228,8 @@ function rowsVault(page: Number, size: Number, num: Number) :: Number:
 
 function vaultPrice(n: Number) :: Number:
 	set {_p} to yaml value "settings.vault-price-increase-per-vault" from file "plugins/AdvancedVaults/config.yml"
-	set {_price-increase} to {_n} * {_p}
+	set {_price-increase} to ({_n}-1) * {_p}
 	return {_price-increase}
-
-
 
 function advVaultMenu(p: Player, page: Number):
 	set {_u} to uuid of {_p}
@@ -363,4 +361,10 @@ command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]:
 						message "{@prefix} &c%arg 3% &7has no vaults."	
 				else:
 					message "{@prefix} &cYou do not have permission to use this command."
+
+		else if arg 1 is "reload":
+			if player has permission "advancedvaults.admin.reload":
+				make player execute command "skript reload %script%"
+			else:
+				message "{@prefix} &cYou do not have permission to use this command."
 
