@@ -157,8 +157,8 @@ function vaultLimits(p: Player):
 			set {advvaults.min::%{_uuid}%} to {advvaults.max::%{_uuid}%}
 		if {advvaults.owned::%{_uuid}%} is not set:
 			set {advvaults.owned::%{_uuid}%} to {advvaults.min::%{_uuid}%}
-		if {advvaults.rows::%{_uuid}%} > 6:
-			set {advvaults.rows::%{_uuid}%} to 6
+		if {advvaults.rows::%{_uuid}%} > 5:
+			set {advvaults.rows::%{_uuid}%} to 5
 		if {advvaults.rows::%{_uuid}%} < 1:
 			set {advvaults.rows::%{_uuid}%} to 1
 
@@ -174,12 +174,20 @@ function vaultOpen(p: OfflinePlayer, n: Number, a: Player):
 		set {_file} to "plugins%{_sep}%AdvancedVaults%{_sep}%permissions.yml"
 		set {_rows} to yaml value "permissions.default.rows" from file "%{_file}%"
 	else:
-		set {_rows} to {advvaults.rows::%{_u}%}
+		set {_rows} to {advvaults.rows::%{_u}%} + 1
 	create a gui with virtual chest with size {_rows} named "%{_GUIname}%":
 		run when close:
+			set slot (integers from (9 * {_rows}) - 9 to (9 * {_rows}) - 1) of {_a}'s current inventory to air
 			set {advvaults.items.%{_u}%.%{_n}%::*} to all items of gui-inventory
 			if {_a} is not {_p}:
 				space({_a}, 1, "        &cChanges to &4%{_p}%'s Vault &chave been saved")
+		make gui slot (integers from (9 * {_rows}) - 9 to (9 * {_rows}) - 1) with black stained glass pane named "&0"
+		if {_n} > 1:
+			make gui slot ((9*{_rows}) - 9) with skull of "MHF_ArrowLeft" parsed as offline player named "&c« &4Previous Vault":
+				vaultOpen({_p}, ({_n} - 1), {_a})
+		if {advvaults.owned::%{_u}%} <= {_n} + 1:
+			make gui slot ((9*{_rows}) - 1) with skull of "MHF_ArrowRight" parsed as offline player named "&2Next Vault &a»":
+				vaultOpen({_p}, ({_n} + 1), {_a})
 		open last created gui to {_a}
 		set {_x} to 0
 		loop {advvaults.items.%{_u}%.%{_n}%::*}:
