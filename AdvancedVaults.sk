@@ -368,3 +368,26 @@ command /vault2 [<text>] [<number>] [<offlineplayer=%player%>]:
 			else:
 				message "{@prefix} &cYou do not have permission to use this command."
 
+
+
+##############################
+#
+#		SIGN STUFF
+#
+##############################
+
+on sign change:
+	if line 1 is "[Vaults]" or "[Vault]":
+		if player doesn't have permission "advancedvaults.admin.createsign":
+			message "{@prefix} &cYou do not have permission to use this function."
+		else:
+			set line 1 to "&8[&c&lAdv&4Vaults&8]"
+			set line 2 to "&8Click to Open"
+			set line 3 to "&c&lVaults"
+
+on rightclick on sign:
+	if line 1 of clicked block is "&8[&c&lAdv&4Vaults&8]":
+		if player doesn't have permission "advancedvaults.usesign":
+			message "{@prefix} &cYou do not have permission to use this function."
+		else:
+			make player run command "/vault" as op
